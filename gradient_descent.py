@@ -97,20 +97,59 @@ jparams = json.load(open(dir_path +  '/params.json'))
 P = jparams["time_series"]
 T = np.array([1,2,3,4,5,6])
 
-
-parameters, trace = gradient_descent([0, 1, 1], P[1], func, gradient_func, 0.0002, 10000)
-
-print(parameters)
-
+# Perform gradient descent for separate dimensions
 time = np.linspace(1, 6, 100)
-curve = []
-for t in time:
-    curve.append(parameters[0] + parameters[1]*t + parameters[2]*t**2)
+reconstructed = []
+
+for dimension in P:
+    parameters, trace = gradient_descent([0, 1, 1], dimension, func, gradient_func, 0.0002, 10000)
 
 
-plt.plot(time, curve)
-plt.plot(T, P[1])
+    # Reconstructing curve with obtained parameters
+
+    curve = []
+    for t in time:
+        curve.append(parameters[0] + parameters[1]*t + parameters[2]*t**2)
+
+    reconstructed.append(curve)
+
+
+# Plot results
+fig = plt.figure(figsize=(18, 4))
+fig.suptitle("Polynomial Regression", fontsize=20)
+
+axes = [fig.add_subplot(1, 4, i) for i in range(1, 4)]
+axes.append(fig.add_subplot(1, 4, 4, projection='3d'))
+
+
+
+
+for i in range(3):
+    axes[i].plot(time, reconstructed[i], label='Regression')
+    axes[i].plot(T, P[i], label='Data')
+    axes[i].set_xlabel('Time / s')
+    axes[i].set_ylabel('Spatial dimension {}'.format(i+1))
+    axes[i].legend()
+
+axes[3].plot(*P, label='Data')
+axes[3].plot(*reconstructed, label='Regression')
+axes[3].legend()
+
 plt.show()
+
+
+
+ax = plt.axes(projection='3d')
+ax.scatter3D(*P)
+ax.scatter3D(*reconstructed)
+plt.show()
+
+
+
+
+
+
+
 
 """
 ### Regenerating grid for visual comparison
