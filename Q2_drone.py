@@ -25,9 +25,9 @@ y = positions[:, 1]
 z = positions[:, 2]
 
 # Print to check
-# print(y)
-# print(y[1])
-# print(type(y))
+print(y)
+print(y[1])
+print(type(y))
 
 # Create a figure with 4 subplots
 fig = plt.figure(figsize=(12,10))
