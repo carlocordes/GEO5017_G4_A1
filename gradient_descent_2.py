@@ -39,7 +39,7 @@ def gradient_descent_speed(pts_dim, params):
     start = np.random.randn()
     for i in range(max_iter):
         estimate = time_dim * speed + start
-        error = estimate - pts_dim
+        error = pts_dim - estimate
         E = np.mean(error**2)
 
         grad_start = -2 * np.sum(error)
@@ -49,8 +49,8 @@ def gradient_descent_speed(pts_dim, params):
             print(f'Residual error: {E}')
             break
 
-        start = start - learn_rate * -grad_start
-        speed = speed - learn_rate * -grad_speed
+        start = start - learn_rate * grad_start
+        speed = speed - learn_rate * grad_speed
 
         # if i % 100 == 0:
         #     print(f'{i}th iteration, loss = {E}, start = {start}, speed = {speed}')
@@ -66,13 +66,13 @@ def gradient_descent_acceleration(pts_dim, params):
     # Formula for constant acceleration: start + speed * time + 0.5 * acceleration * time**2
     # Initialise random parameters
     # Possible to also initialise at 0 - ie: take t=1 as starting points with 0 speed/acceleration
-    speed = np.random.randn()
-    start = np.random.randn()
-    acc = np.random.randn()
+    speed = (pts_dim[1] - pts_dim[0]) / (time_dim[1] - time_dim[0])
+    start = pts_dim[0]
+    acc = 0
 
     for i in range(max_iter):
         estimate = start + speed * time_dim + 0.5 * acc * time_dim**2
-        error = estimate - pts_dim
+        error = pts_dim - estimate
         E = np.mean(error**2)
 
         grad_start = -2 * np.sum(error)
@@ -84,10 +84,10 @@ def gradient_descent_acceleration(pts_dim, params):
                 np.abs(grad_acc * learn_rate) < tol):
             print(f'Converged after {i} iterations.')
             print(f'Residual error: {E}')
-            break
-        start = start - learn_rate * -grad_start
-        speed = speed - learn_rate * -grad_speed
-        acc = acc - learn_rate * -grad_acc
+            return start, speed, acc
+        start = start - learn_rate * grad_start
+        speed = speed - learn_rate * grad_speed
+        acc = acc - learn_rate * grad_acc
     print(f'Best estimates for start: {start}, speed: {speed}, acceleration: {acc}.')
     return start, speed, acc
 
@@ -121,12 +121,22 @@ k = len(t) + 1
 a = np.zeros((1,k))
 b = np.zeros((1,k))
 c = np.zeros((1,k))
+
 for i in range(k):
-    a[0,i] = x_start_b + x_start_b * i + 0.5 * x_acc_b* i ** 2
-    b[0,i] = y_start_b + y_start_b * i + 0.5 * y_acc_b * i ** 2
-    c[0,i] = z_start_b + z_start_b * i + 0.5 * z_acc_b * i ** 2
-    
-print(a[6],b[6],c[6])
+    a[0,i] = x_start_b + x_start_b * (i+1) + 0.5 * x_acc_b * (i+1) ** 2
+    b[0,i] = y_start_b + y_start_b * (i+1) + 0.5 * y_acc_b * (i+1) ** 2
+    c[0,i] = z_start_b + z_start_b * (i+1) + 0.5 * z_acc_b * (i+1) ** 2
+
+d = np.zeros((1,k))
+e = np.zeros((1,k))
+f = np.zeros((1,k))
+
+for i in range(k):
+    d[0,i] = x_start_a + x_start_a * (i+1) 
+    e[0,i] = y_start_a + y_start_a * (i+1) 
+    f[0,i] = z_start_a + z_start_a * (i+1) 
+
+print(a[0,6],b[0,6],c[0,6])
 
 # # 2(c) Position at t=7
 # x7 = x_start_b + x_speed_b * 7 + 0.5 * x_acc_b * 7**2
@@ -143,6 +153,13 @@ print(a[6],b[6],c[6])
 ax1 = fig.add_subplot(projection='3d')
 ax1.scatter(a, b, c, c='blue', marker='o', label='Points')
 ax1.plot(a, b, c, color='blue')
+ax1.plot(x, y, z, color='orange')
 ax1.legend()
+
+ax2 = fig.add_subplot(projection='3d')
+ax2.scatter(x, y, z, c='blue', marker='o', label='Points')
+ax2.plot(d, e, f, color='blue')
+ax2.plot(x, y, z, color='orange')
+ax2.legend()
 plt.show()
 
