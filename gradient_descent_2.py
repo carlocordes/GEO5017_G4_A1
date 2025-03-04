@@ -17,14 +17,14 @@ t = data_pts[3]
 params = {
     "time_dim":t,
     "learn_rate":0.001,
-    "max_iter":100000,
+    "max_iter":10000,
     "tol":0.0001
 }
 
 # 1) Plotting trajectory of data points
 fig = plt.figure(figsize=(10, 10))
 ax = fig.add_subplot(projection='3d')
-ax.scatter(x, y, z, cmap='ocean', c=t, marker='o', label='Points')
+ax.scatter(x, y, z, c='blue', marker='o', label='Points')
 ax.plot(x, y, z, color='blue')
 ax.legend()
 
@@ -42,15 +42,15 @@ def gradient_descent_speed(pts_dim, params):
         error = estimate - pts_dim
         E = np.mean(error**2)
 
-        grad_start = 2 * np.mean(error)
-        grad_speed = 2 * np.mean(error * time_dim)
-        if np.abs(grad_start * learn_rate) < tol and np.abs(grad_speed * learn_rate) < tol:
+        grad_start = -2 * np.sum(error)
+        grad_speed = -2 * np.sum(error * time_dim)
+        if np.abs(grad_start) < tol and np.abs(grad_speed) < tol:
             print(f'Converged after {i} iterations.')
             print(f'Residual error: {E}')
             break
 
-        start = start - learn_rate * grad_start
-        speed = speed - learn_rate * grad_speed
+        start = start - learn_rate * -grad_start
+        speed = speed - learn_rate * -grad_speed
 
         # if i % 100 == 0:
         #     print(f'{i}th iteration, loss = {E}, start = {start}, speed = {speed}')
@@ -75,9 +75,9 @@ def gradient_descent_acceleration(pts_dim, params):
         error = estimate - pts_dim
         E = np.mean(error**2)
 
-        grad_start = 2 * np.mean(error)
-        grad_speed = 2 * np.mean(error * time_dim)
-        grad_acc = 2 * np.mean(error * 0.5 * time_dim**2)
+        grad_start = -2 * np.sum(error)
+        grad_speed = -2 * np.sum(error * time_dim)
+        grad_acc = -2 * np.sum(error * 0.5 * time_dim**2)
 
         if (np.abs(grad_start * learn_rate) < tol and
                 np.abs(grad_speed * learn_rate) < tol and
@@ -85,9 +85,9 @@ def gradient_descent_acceleration(pts_dim, params):
             print(f'Converged after {i} iterations.')
             print(f'Residual error: {E}')
             break
-        start = start - learn_rate * grad_start
-        speed = speed - learn_rate * grad_speed
-        acc = acc - learn_rate * grad_acc
+        start = start - learn_rate * -grad_start
+        speed = speed - learn_rate * -grad_speed
+        acc = acc - learn_rate * -grad_acc
     print(f'Best estimates for start: {start}, speed: {speed}, acceleration: {acc}.')
     return start, speed, acc
 
@@ -103,22 +103,46 @@ x_start_b, x_speed_b, x_acc_b = gradient_descent_acceleration(x, params)
 y_start_b, y_speed_b, y_acc_b = gradient_descent_acceleration(y, params)
 z_start_b, z_speed_b, z_acc_b = gradient_descent_acceleration(z, params)
 
-# 2(c) Position at t=7
-x7 = x_start_b + x_speed_b * 7 + 0.5 * x_acc_b * 7**2
-y7 = y_start_b + y_speed_b * 7 + 0.5 * y_acc_b * 7**2
-z7 = z_start_b + z_speed_b * 7 + 0.5 * z_acc_b * 7**2
-print("Estimated position at t=7, given constant acceleration: \n"
-      f"X = {x7}, Y = {y7}, Z = {z7}")
+# For multiple new predictions
+# k = 7
+# x1, y1, z1, t1 = x, y, z, t
+# for i in range(k):
+#     xi = x_start_b + x_speed_b * (i + 7) + 0.5 * x_acc_b * (i + 7)**2
+#     yi = y_start_b + y_speed_b * (i + 7) + 0.5 * y_acc_b * (i + 7)**2
+#     zi = z_start_b + z_speed_b * (i + 7) + 0.5 * z_acc_b * (i + 7)**2
+#     ti = 7 + i
+#     x1 = np.append(x1,xi)
+#     y1 = np.append(y1,yi)
+#     z1 = np.append(z1,zi)
+#     t1 = np.append(t1,ti)
+# print(t1)
 
-x1 = np.append(x, x7)
-y1 = np.append(y, y7)
-z1 = np.append(z, z7)
-t1 = np.append(t, 7)
+k = len(t) + 1
+a = np.zeros((1,k))
+b = np.zeros((1,k))
+c = np.zeros((1,k))
+for i in range(k):
+    a[0,i] = x_start_b + x_start_b * i + 0.5 * x_acc_b* i ** 2
+    b[0,i] = y_start_b + y_start_b * i + 0.5 * y_acc_b * i ** 2
+    c[0,i] = z_start_b + z_start_b * i + 0.5 * z_acc_b * i ** 2
+    
+print(a[6],b[6],c[6])
+
+# # 2(c) Position at t=7
+# x7 = x_start_b + x_speed_b * 7 + 0.5 * x_acc_b * 7**2
+# y7 = y_start_b + y_speed_b * 7 + 0.5 * y_acc_b * 7**2
+# z7 = z_start_b + z_speed_b * 7 + 0.5 * z_acc_b * 7**2
+# print("Estimated position at t=7, given constant acceleration: \n"
+#       f"X = {x7}, Y = {y7}, Z = {z7}")
+
+# x1 = np.append(x, x7)
+# y1 = np.append(y, y7)
+# z1 = np.append(z, z7)
+# t1 = np.append(t, 7)
 
 ax1 = fig.add_subplot(projection='3d')
-ax1.scatter(x1, y1, z1, cmap='ocean', c=t1, marker='o', label='Points')
-ax1.plot(x1, y1, z1, color='blue')
+ax1.scatter(a, b, c, c='blue', marker='o', label='Points')
+ax1.plot(a, b, c, color='blue')
 ax1.legend()
-
 plt.show()
 
