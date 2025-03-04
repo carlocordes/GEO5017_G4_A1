@@ -85,7 +85,7 @@ def gradient_descent(start, dim, function, gradient, learn_rate, max_iter, tol):
         params: updated params [a0, a1]
 
     """
-    params = np.array(start, dtype=float)
+    params = np.array(start, dtype=float)       # [a0,a1]
     for it in range(max_iter):
         # Calculate gradients, grads = array to hold gradients of a0 and a1
         grads = np.array(gradient_func(dim, *params))   # *params (*) is unpack operator to store a0 and a1 individually instead of array of params
@@ -122,6 +122,22 @@ print(f"x2_start: {x2_start:.4f} and x2_speed: {x2_speed:.4f}")
 print(f"y_start: {y_start:.4f} and y_speed: {y_speed:.4f}")
 print(f"x_start: {z_start:.4f} and x_speed: {z_speed:.4f}")
 
+# Plot the result
+x_pred = x_start + x_speed * t
+y_pred = y_start + y_speed * t
+z_pred = z_start + z_speed * t
+
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.scatter(x,y,z, color='red', label='Actual data')
+ax.plot(x_pred, y_pred, z_pred, color='blue', label='Speed model prediction')
+ax.set_title('Constant Speed Model')
+ax.set_xlabel('X Position')
+ax.set_ylabel('Y Position')
+ax.set_zlabel('Z Position')
+ax.legend()
+plt.show()
 
 print("\n------------------- PRINT TO CHECK DELETE LATER --------------------------------\n")
 
@@ -161,45 +177,3 @@ print("a: ", a)
 
 
 
-
-
-#--------------------------------------------------------------------------------------------------------------
-# def gradient_descent(start, dim, function, gradient, learn_rate, max_iter, tol=0.00001):
-#     params = np.array(start, dtype=float)  # [a0, a1]
-#     for it in range(max_iter):
-#         grads = np.array(gradient(dim, *params))
-#         params -= learn_rate * grads
-#         E = function(dim, *params)
-#         if np.linalg.norm(grads) < tol:
-#             break
-#     return params
-#
-# x_params = gradient_descent([0, 0], data_pts[0], func, gradient_func, 0.01, 100)
-# y_params = gradient_descent([0, 0], data_pts[1], func, gradient_func, 0.01, 100)
-# z_params = gradient_descent([0, 0], data_pts[2], func, gradient_func, 0.01, 100)
-#
-# x_start, x_speed = x_params
-# y_start, y_speed = y_params
-# z_start, z_speed = z_params
-#
-# print("\nFinal Results:")
-# print(f"X: Starting Point = {x_start:.2f}, Speed = {x_speed:.2f}")
-# print(f"Y: Starting Point = {y_start:.2f}, Speed = {y_speed:.2f}")
-# print(f"Z: Starting Point = {z_start:.2f}, Speed = {z_speed:.2f}")
-#
-# # 📌 8. Plot the results.
-# time = np.linspace(1, 6, 100)
-# x_pred = x_start + x_speed * time
-# y_pred = y_start + y_speed * time
-# z_pred = z_start + z_speed * time
-#
-# fig = plt.figure()
-# ax = fig.add_subplot(111, projection='3d')
-# ax.scatter(data_pts[0], data_pts[1], data_pts[2], color='red', label='Actual Data')
-# ax.plot(x_pred, y_pred, z_pred, color='blue', label='Speed Model Prediction')
-# ax.set_title('Constant Speed Model for Drone Trajectory')
-# ax.set_xlabel('X Position')
-# ax.set_ylabel('Y Position')
-# ax.set_zlabel('Z Position')
-# ax.legend()
-# plt.show()
