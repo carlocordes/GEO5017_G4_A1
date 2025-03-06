@@ -39,42 +39,45 @@ print(type(x))
 #     # print(f"E = {E}")
 #     return E
 
-def func(dim, a0, a1):
+def func(dim, a0, a1, a2):
     """
 
     Args:
         dim: XYZ position values, an array
-        a0: starting point, int/float
-        a1: speed - first derivative, int/float
+        a0: starting point, float
+        a1: speed - first derivative, float
+        a2: acceleration - second derivative, float
 
     Returns:
         E: residual error
     """
-    E = np.sum((dim - (a0 + a1*t))**2)   # actual position (dim) - guessed position ((a0 + a1*t))**2)
+    E = np.sum((dim - (a0 + a1*t + 0.5*a2*t**2))**2) # actual position (dim) - guessed position (a0 + a1*t + 0.5*a2*t**2))**2)
     # print(f"E = {E}")
     return E
 
-def gradient_func(dim, a0, a1):
+def gradient_func(dim, a0, a1, a2):
     """
 
     Args:
         dim:
         a0:
         a1:
+        a2:
 
     Returns:
-        dE_da0 and dE_da1: The gradient value or the value of starting point and speed
+        dE_da0, dE_da1, dE_da2: The gradient value or the value of starting point, speed, acceleration
     """
-    dE_da0 = -2 * np.sum(dim-(a0 + a1*t))           # dE_da0 = gradient of a0 -> starting point
-    dE_da1 = -2 * np.sum((dim-(a0 + a1*t)) * t)     # dE_da1 = gradient of a1 -> speed
+    dE_da0 = -2 * np.sum(dim-(a0 + a1*t + 0.5*a2*t**2))                     # dE_da0 = gradient of a0 -> starting point
+    dE_da1 = -2 * np.sum(t * (dim-(a0 + a1*t + 0.5*a2*t**2)))               # dE_da1 = gradient of a1 -> speed
+    dE_da2 = -2 * np.sum(0.5*t**2 * t * (dim-(a0 + a1*t + 0.5*a2*t**2)))    # dE_da2 = gradient of a2 -> acceleration
 
     # print(f"dE_da0 = {dE_da0}, dE_da1 = {dE_da0}")
-    return dE_da0, dE_da1
+    return dE_da0, dE_da1, dE_da2
 
 def gradient_descent(start, dim, function, gradient, learn_rate, max_iter, tol):
     """
     Args:
-        start: list of initial guess of starting point (a0) and speed (a1): [a0, a1]
+        start: list of initial guess of starting point (a0), speed (a1), acceleration (a2): [a0, a1, a2]
         dim: array of position value: X, Y, Z, example X: [2, 1.08, -0.83, -1.97, -1.31, 0.57].
         function: function that calculates residual error (E)
         gradient: function that calculates how much to adjust the "initial" starting point and speed
@@ -83,7 +86,7 @@ def gradient_descent(start, dim, function, gradient, learn_rate, max_iter, tol):
         tol: float
 
     Returns:
-        params: updated params [a0, a1]
+        params: updated params [a0, a1, a2]
         last_E: last residual error (for printing)
         last_it: last iteration (for printing)
 
@@ -109,37 +112,42 @@ def gradient_descent(start, dim, function, gradient, learn_rate, max_iter, tol):
 
 
 # Run Gradient Descent function for all 3 dimensions: X,Y,Z
-learn_rate = 0.01
-max_iter = 2000
-tol = 0.001
-x_params, x_error, x_it = gradient_descent([1,1],x,func, gradient_func,learn_rate,max_iter,tol)
+learn_rate = 0.0003
+max_iter = 100000
+tol = 0.00001
+x_params, x_error, x_it = gradient_descent([1,1,2],x,func, gradient_func,learn_rate,max_iter,tol)
 # x2_params = gradient_descent([0,0],x,func, gradient_func,learn_rate,max_iter,tol)
-y_params, y_error, y_it = gradient_descent([1,1],y,func, gradient_func,learn_rate,max_iter,tol)
-z_params, z_error, z_it = gradient_descent([1,1],z,func, gradient_func,learn_rate,max_iter,tol)
+y_params, y_error, y_it = gradient_descent([1,1,2],y,func, gradient_func,learn_rate,max_iter,tol)
+z_params, z_error, z_it = gradient_descent([1,1,2],z,func, gradient_func,learn_rate,max_iter,tol)
 
 
 # Extracting and printing final parameters
-x_start, x_speed = x_params
+x_start, x_speed, x_acc = x_params
 # x2_start, x2_speed = x2_params
-y_start, y_speed = y_params
-z_start, z_speed = z_params
+y_start, y_speed, y_acc = y_params
+z_start, z_speed, z_acc = z_params
 
 print("\nFinal Results:")
-print(f"x_start: {x_start:.4f} and x_speed: {x_speed:.4f}, residual error = {x_error:.3f}, iteration={x_it}")
+print(f"x_start: {x_start:.4f}, x_speed: {x_speed:.4f}, x_acc: {x_acc:.4f}, residual error = {x_error:.3f}, iteration={x_it}")
 # print(f"x2_start: {x2_start:.4f} and x2_speed: {x2_speed:.4f}")
-print(f"y_start: {y_start:.4f} and y_speed: {y_speed:.4f}, residual error = {y_error:.3f}, iteration={y_it}")
-print(f"z_start: {z_start:.4f} and z_speed: {z_speed:.4f}, residual error = {z_error:.3f}, iteration={z_it}")
+print(f"y_start: {y_start:.4f}, y_speed: {y_speed:.4f}, y_acc: {y_acc:.4f}, residual error = {y_error:.3f}, iteration={y_it}")
+print(f"z_start: {z_start:.4f}, z_speed: {z_speed:.4f}, z_acc: {z_acc:.4f}, residual error = {z_error:.3f}, iteration={z_it}")
 
 # Plot the result
-x_pred = x_start + x_speed * t
-y_pred = y_start + y_speed * t
-z_pred = z_start + z_speed * t
+x_pred = x_start + x_speed*t + 0.5*x_acc*t**2
+y_pred = y_start + y_speed*t + 0.5*y_acc*t**2
+z_pred = z_start + z_speed*t + 0.5*z_acc*t**2
 
+# Predict XYZ at t=7
+x_pred_7 = x_start + x_speed*7 + 0.5*x_acc*7**2
+y_pred_7 = y_start + y_speed*7 + 0.5*y_acc*7**2
+z_pred_7 = z_start + z_speed*7 + 0.5*z_acc*7**2
 
 fig = plt.figure()
 ax = fig.add_subplot(111, projection='3d')
 ax.scatter(x,y,z, color='red', label='Actual data')
 ax.plot(x_pred, y_pred, z_pred, color='blue', label='Speed model prediction')
+ax.plot(x_pred_7, y_pred_7, z_pred_7, color='red')
 ax.set_title('Constant Speed Model')
 ax.set_xlabel('X Position')
 ax.set_ylabel('Y Position')
