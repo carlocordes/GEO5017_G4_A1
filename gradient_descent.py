@@ -102,7 +102,7 @@ reconstructed = []
 
 
 for dimension in P:
-    parameters, trace = gradient_descent([jparams["a0"], jparams["a1"], jparams["a2"]],
+    parameters, trace = gradient_descent([jparams["x0"], jparams["y0"], jparams["z0"]],
                                          dimension, func, gradient_func,
                                          jparams["learning_rate"],
                                          jparams["max_iter"],
