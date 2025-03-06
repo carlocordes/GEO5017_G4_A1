@@ -42,15 +42,16 @@ for dim in P:
     a3 = u[2][3] / u[2][2]
     a2 = (u[1][3] - u[1][2]*a3) / u[1][1]
     a1 = (u[0][3] - u[0][2]*a3 - u[0][1]*a2) / u[0][0]
-
+    print(a1, a2, a3)
     curve = []
     for t in time:
         curve.append(a1 + a2*t + a3*t**2)
 
     reconstructed.append(curve)
+
 # Plot results
 fig = plt.figure(figsize=(18, 4))
-fig.suptitle("Linear Regression", fontsize=20)
+fig.suptitle("Closed-form Polynomial", fontsize=20)
 
 axes = [fig.add_subplot(1, 4, i) for i in range(1, 4)]
 axes.append(fig.add_subplot(1, 4, 4, projection='3d'))

@@ -43,9 +43,7 @@ def gradient_func(dim, a0, a1, a2 = 0):
 
     return dE_da0, dE_da1, dE_da2
 
-
-
-def gradient_descent(start, dim, function, gradient, learn_rate, max_iter, tol=0.00001):
+def gradient_descent(start, dim, function, gradient, learn_rate, max_iter, tol):
     """
     Performs gradient descent to minimize a given function.
 
@@ -69,18 +67,18 @@ def gradient_descent(start, dim, function, gradient, learn_rate, max_iter, tol=0
     for it in range(max_iter):
         grads = np.array(gradient(dim, *params))
         steps = learn_rate * grads
-        print("Iteration: {} - Shape parameters: {}, {}, {} - E = {}".format(it, *params, func(dim, *params)))
+        #print("Iteration: {} - Shape parameters: {}, {}, {} - E = {}".format(it, *params, func(dim, *params)))
 
 
         if (np.linalg.norm(steps, len(start)) < tol):
-            print("Terminating. Exceeding minimum tolerance after {} iterations".format(it))
+            print("Exceeding tolerance after {} iterations, parameters: {},{},{}, E = {}".format(it, *params, func(dim, *params)))
             return params, param_trace
 
 
         #Collect parameters of iteration
         it_params = []
         it_params.extend(params)
-        it_params.append(func(dim, *params))
+        it_params.append(function(dim, *params))
         it_params.append(it)
 
         param_trace.append(it_params)
@@ -98,18 +96,23 @@ P = jparams["time_series"]
 T = np.array([1,2,3,4,5,6])
 
 # Perform gradient descent for separate dimensions
-time = np.linspace(1, 6, 100)
+time = np.linspace(1, 7, 100)
 reconstructed = []
 
-for dimension in P:
-    parameters, trace = gradient_descent([0, 1, 1], dimension, func, gradient_func, 0.0002, 10000)
 
+
+for dimension in P:
+    parameters, trace = gradient_descent([jparams["a0"], jparams["a1"], jparams["a2"]],
+                                         dimension, func, gradient_func,
+                                         jparams["learning_rate"],
+                                         jparams["max_iter"],
+                                         tol = jparams["tolerance"])
 
     # Reconstructing curve with obtained parameters
 
     curve = []
     for t in time:
-        curve.append(parameters[0] + parameters[1]*t + parameters[2]*t**2)
+        curve.append(float(parameters[0] + parameters[1]*t + parameters[2]*t**2))
 
     reconstructed.append(curve)
 
@@ -120,9 +123,6 @@ fig.suptitle("Polynomial Regression", fontsize=20)
 
 axes = [fig.add_subplot(1, 4, i) for i in range(1, 4)]
 axes.append(fig.add_subplot(1, 4, 4, projection='3d'))
-
-
-
 
 for i in range(3):
     axes[i].plot(time, reconstructed[i], label='Regression')
@@ -136,37 +136,3 @@ axes[3].plot(*reconstructed, label='Regression')
 axes[3].legend()
 
 plt.show()
-
-
-
-ax = plt.axes(projection='3d')
-ax.scatter3D(*P)
-ax.scatter3D(*reconstructed)
-plt.show()
-
-
-
-
-
-
-
-
-"""
-### Regenerating grid for visual comparison
-a0s = np.linspace(-10, 10, 21)
-a1s = np.linspace(-10, 10, 21)
-
-A0, A1 = np.meshgrid(a0s, a1s, indexing='ij')
-Z = func(P[0], A0, A1, 0)
-
-fig = plt.figure(figsize=(6, 6))
-ax1 = fig.add_subplot(projection='3d')
-ax1.plot_surface(A0, A1, Z, cmap='viridis', alpha = 0.6)
-for point in trace:
-    ax1.scatter(point[0], point[1], point[3], c = 'red')
-ax1.set_xlabel('a0')
-ax1.set_ylabel('a1')
-ax1.set_zlabel('Function Value')
-ax1.set_title('3D Surface Plot of func (a0, a1)')
-plt.show()
-"""
